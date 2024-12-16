@@ -44,8 +44,19 @@ function expenseAdd(newExpense) {
         const expenseIcon = document.createElement('img');
         expenseIcon.setAttribute('src', `img/${newExpense.category_id}.svg`);
         expenseIcon.setAttribute('alt', newExpense.category_name);
-
         expenseItem.appendChild(expenseIcon);
+
+        const expenseInfo = document.createElement('div');
+        expenseInfo.classList.add('expense-info');
+        const expenseName = document.createElement('strong');
+        expenseName.textContent = newExpense.expense;
+        expenseInfo.appendChild(expenseName);
+        const categoryName = document.createElement('strong');
+        categoryName.textContent = newExpense.category_name;
+        expenseInfo.appendChild(categoryName);
+        expenseItem.appendChild(expenseInfo);
+        expenseItem.appendChild(expenseInfo);
+
         expenseList.appendChild(expenseItem);
     } catch (error) {
         alert('Unable to update expense list!');
