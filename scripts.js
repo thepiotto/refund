@@ -1,125 +1,122 @@
-const form = document.querySelector('form');
-const amount = document.querySelector('#amount');
-const expense = document.querySelector('#expense');
-const category = document.querySelector('#category');
+const expenseForm = document.querySelector('form');
+const amountInput = document.querySelector('#amount');
+const expenseInput = document.querySelector('#expense');
+const categorySelect = document.querySelector('#category');
 
-const expenseList = document.querySelector('ul');
-const expensesQuantity = document.querySelector('aside header p span');
-const expensesTotalAmount = document.querySelector('aside header h2');
+const expenseListElement = document.querySelector('ul');
+const totalExpensesCount = document.querySelector('aside header p span');
+const totalExpensesAmount = document.querySelector('aside header h2');
 
-amount.addEventListener('input', () => {
-    let value = amount.value.replace(/\D+/g, '');
+amountInput.addEventListener('input', () => {
+    let numericValue = amountInput.value.replace(/\D+/g, '');
 
-    amount.value = convertToCents(value);
+    amountInput.value = convertToCents(numericValue);
 });
 
 function convertToCents(value) {
-    value = Number(value) / 100;
-    return formatCurrencyBRL(value);
+    const valueInCents = Number(value) / 100;
+    return formatToBRLCurrency(valueInCents);
 }
 
-function formatCurrencyBRL(value) {
-    value = value.toLocaleString('pt-BR', {
+function formatToBRLCurrency(value) {
+    return value.toLocaleString('pt-BR', {
         style: 'currency',
         currency: 'BRL'
     });
-
-    return value;
 }
 
-form.addEventListener('submit', (event) => {
+expenseForm.addEventListener('submit', (event) => {
     event.preventDefault();
 
     const newExpense = {
-        id: new Date().getTime(),
-        amount: amount.value,
-        expense: expense.value,
-        category_id: category.value,
-        category_name: category.options[category.selectedIndex].text, // capture a name of selected option
-        created_at: new Date(),
+        id: Date.now(),
+        amount: amountInput.value,
+        description: expenseInput.value,
+        categoryId: categorySelect.value,
+        categoryName: categorySelect.options[categorySelect.selectedIndex].text, // Capture the name of the selected option
+        createdAt: new Date(),
     };
 
-    expenseAdd(newExpense);
-    updateTotals();
-    prepareFormToNewExpense();
+    addExpenseToList(newExpense);
+    updateExpenseTotals();
+    resetExpenseForm();
 });
 
-function prepareFormToNewExpense () {
-    expense.value = "";
-    amount.value = "";
-    category.value = "";
+function resetExpenseForm() {
+    expenseInput.value = "";
+    amountInput.value = "";
+    categorySelect.value = "";
 
-    expense.focus();
+    expenseInput.focus();
 }
 
-function expenseAdd(newExpense) {
+function addExpenseToList(expense) {
     try {
         const expenseItem = document.createElement('li');
         expenseItem.classList.add('expense');
 
         const expenseIcon = document.createElement('img');
-        expenseIcon.setAttribute('src', `img/${newExpense.category_id}.svg`);
-        expenseIcon.setAttribute('alt', newExpense.category_name);
+        expenseIcon.setAttribute('src', `img/${expense.categoryId}.svg`);
+        expenseIcon.setAttribute('alt', expense.categoryName);
 
-        const expenseInfo = document.createElement('div');
-        expenseInfo.classList.add('expense-info');
-        const expenseName = document.createElement('strong');
-        expenseName.textContent = newExpense.expense;
-        expenseInfo.appendChild(expenseName);
-        const categoryName = document.createElement('strong');
-        categoryName.textContent = newExpense.category_name;
-        expenseInfo.appendChild(categoryName);
+        const expenseDetails = document.createElement('div');
+        expenseDetails.classList.add('expense-details');
+
+        const expenseDescription = document.createElement('strong');
+        expenseDescription.textContent = expense.description;
+        expenseDetails.appendChild(expenseDescription);
+
+        const expenseCategory = document.createElement('strong');
+        expenseCategory.textContent = expense.categoryName;
+        expenseDetails.appendChild(expenseCategory);
 
         const expenseAmount = document.createElement('span');
         expenseAmount.classList.add('expense-amount');
-        expenseAmount.innerHTML = 
-                                `
-                                    <small>R$</small>${newExpense.amount.toUpperCase().replace("R$", "")}
-                                `;
+        expenseAmount.innerHTML = `
+            <small>R$</small>${expense.amount.toUpperCase().replace("R$", "")}
+        `;
 
-        const removeIcon = document.createElement('img');
-        removeIcon.classList.add('remove-icon');
-        removeIcon.setAttribute('src', './img/remove.svg');
-        removeIcon.setAttribute('alt', 'remover');
+        const removeButton = document.createElement('img');
+        removeButton.classList.add('remove-button');
+        removeButton.setAttribute('src', './img/remove.svg');
+        removeButton.setAttribute('alt', 'Remove');
 
-        expenseItem.append(expenseIcon, expenseInfo, expenseAmount, removeIcon);
-        expenseList.appendChild(expenseItem);
+        expenseItem.append(expenseIcon, expenseDetails, expenseAmount, removeButton);
+        expenseListElement.appendChild(expenseItem);
     } catch (error) {
         alert('Unable to update expense list!');
-        console.log(error);
+        console.error(error);
     }
 }
 
-function updateTotals() {
+function updateExpenseTotals() {
     try {
-        const items = expenseList.children;
-        expensesQuantity.textContent = `
-            ${items.length} ${items.length > 1 ? 'despensas' : 'despensa'}
+        const expenseItems = expenseListElement.children;
+        totalExpensesCount.textContent = `
+            ${expenseItems.length} ${expenseItems.length > 1 ? 'despesas' : 'despesa'}
         `;
         let total = 0;
 
-        for (let item of items) {
-            let amount = item.querySelector('.expense-amount');
-            let value = amount.textContent.replace(/[^\d]/g, "");
+        for (let item of expenseItems) {
+            let amountElement = item.querySelector('.expense-amount');
+            let amountValue = amountElement.textContent.replace(/[^\d]/g, "");
 
-            value = Number(value);
-            total += value;
+            total += Number(amountValue);
         }
-        total = convertToCents(total);
-        expensesTotalAmount.innerHTML = 
-                                    `
-                                        <small>R$</small>${total.toUpperCase().replace("R$", "")}
-                                    `;
+        const formattedTotal = convertToCents(total);
+        totalExpensesAmount.innerHTML = `
+            <small>R$</small>${formattedTotal.toUpperCase().replace("R$", "")}
+        `;
     } catch (error) {
-        console.log(error);
+        console.error(error);
         alert('Unable to update totals!');
     }
 }
 
-expenseList.addEventListener('click', (event) => {
-    if (event.target.classList.contains('remove-icon')) {
-        const item = event.target.closest('.expense');
-        item.remove();
-        updateTotals();
+expenseListElement.addEventListener('click', (event) => {
+    if (event.target.classList.contains('remove-button')) {
+        const expenseItem = event.target.closest('.expense');
+        expenseItem.remove();
+        updateExpenseTotals();
     }
 });
