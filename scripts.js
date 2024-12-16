@@ -4,14 +4,19 @@ const expense = document.querySelector('#expense');
 const category = document.querySelector('#category');
 
 const expenseList = document.querySelector('ul');
+const expensesQuantity = document.querySelector('aside header p span');
+const expensesTotalAmount = document.querySelector('aside header h2');
 
 amount.addEventListener('input', () => {
     let value = amount.value.replace(/\D+/g, '');
 
-    // convert money for cents
-    value = Number(value) / 100;
-    amount.value = formatCurrencyBRL(value);
+    amount.value = convertToCents(value);
 });
+
+function convertToCents(value) {
+    value = Number(value) / 100;
+    return formatCurrencyBRL(value);
+}
 
 function formatCurrencyBRL(value) {
     value = value.toLocaleString('pt-BR', {
@@ -35,11 +40,9 @@ form.addEventListener('submit', (event) => {
     };
 
     expenseAdd(newExpense);
+    updateTotals();
 });
 
-/*
-<img src="./img/remove.svg" alt="remover" class="remove-icon" />
-*/
 function expenseAdd(newExpense) {
     try {
         const expenseItem = document.createElement('li');
@@ -75,5 +78,31 @@ function expenseAdd(newExpense) {
     } catch (error) {
         alert('Unable to update expense list!');
         console.log(error);
+    }
+}
+
+function updateTotals() {
+    try {
+        const items = expenseList.children;
+        expensesQuantity.textContent = `
+            ${items.length} ${items.length > 1 ? 'despensas' : 'despensa'}
+        `;
+        let total = 0;
+
+        for (let item of items) {
+            let amount = item.querySelector('.expense-amount');
+            let value = amount.textContent.replace(/[^\d]/g, "");
+
+            value = Number(value);
+            total += value;
+        }
+        total = convertToCents(total);
+        expensesTotalAmount.innerHTML = 
+                                    `
+                                        <small>R$</small>${total.toUpperCase().replace("R$", "")}
+                                    `;
+    } catch (error) {
+        console.log(error);
+        alert('Unable to update totals!');
     }
 }
