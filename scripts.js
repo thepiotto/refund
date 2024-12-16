@@ -3,6 +3,8 @@ const amount = document.querySelector('#amount');
 const expense = document.querySelector('#expense');
 const category = document.querySelector('#category');
 
+const expenseList = document.querySelector('ul');
+
 amount.addEventListener('input', () => {
     let value = amount.value.replace(/\D+/g, '');
 
@@ -36,7 +38,15 @@ form.addEventListener('submit', (event) => {
 
 function expenseAdd(newExpense) {
     try {
-        
+        const expenseItem = document.createElement('li');
+        expenseItem.classList.add('expense');
+
+        const expenseIcon = document.createElement('img');
+        expenseIcon.setAttribute('src', `img/${newExpense.category_id}.svg`);
+        expenseIcon.setAttribute('alt', newExpense.category_name);
+
+        expenseItem.appendChild(expenseIcon);
+        expenseList.appendChild(expenseItem);
     } catch (error) {
         alert('Unable to update expense list!');
         console.log(error);
