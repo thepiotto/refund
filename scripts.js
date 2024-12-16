@@ -41,7 +41,16 @@ form.addEventListener('submit', (event) => {
 
     expenseAdd(newExpense);
     updateTotals();
+    prepareFormToNewExpense();
 });
+
+function prepareFormToNewExpense () {
+    expense.value = "";
+    amount.value = "";
+    category.value = "";
+
+    expense.focus();
+}
 
 function expenseAdd(newExpense) {
     try {
